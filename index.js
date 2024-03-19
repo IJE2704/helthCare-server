@@ -25,6 +25,13 @@ async function run() {
     await client.connect();
 
     const userCollection = client.db("helthCare").collection("user");
+    
+
+    app.get('/users', async(req,res)=>{
+      const users =  userCollection.find();
+      const result = await users.toArray();
+      res.send(result);
+    })
 
     app.post("/registration", async (req, res) => {
       const data = req.body;
