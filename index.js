@@ -50,25 +50,24 @@ async function run() {
     });
 
 
-    app.post('/login', async(req,res)=>{
+    app.post('/login', async(req, res) => {
       const data = req.body;
-      const user = await userCollection.findOne({username:data.username});
-      if(!user){
-        console.log('user not found')
-        return res.status(404).send("User not found");
-      }
-
+      const user = await userCollection.findOne({ username: data.username });
     
-        if(user.password === data.password){
-          // res.json(user);
-          console.log("Successfully login")
-          return res.status(200).json(user).send("Successfully logged it")
-        }
-        else{
-          return res.status(401).send("Password does not match")
-        }
-     
-    })
+      if (!user) {
+        console.log('User not found');
+        return res.status(404).send('User not found');
+      }
+    
+      if (user.password === data.password) {
+        console.log('Successfully logged in');
+        return res.status(200).json(user);
+      } else {
+        console.log('Password does not match');
+        return res.status(401).send('Password does not match');
+      }
+    });
+    
 
 
     // Send a ping to confirm a successful connection
