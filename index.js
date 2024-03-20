@@ -25,9 +25,11 @@ async function run() {
     await client.connect();
 
     const userCollection = client.db("helthCare").collection("user");
+    const userO2Collection = client.db("helthCare").collection("O2");
     
 
     app.get('/users', async(req,res)=>{
+      console.log("get user")
       const users =  userCollection.find();
       const result = await users.toArray();
       res.send(result);
@@ -68,6 +70,20 @@ async function run() {
       }
     });
     
+
+    app.post('/addo2', async(req,res)=>{
+      const o2 = req.body;
+      const result = await userO2Collection.insertOne(o2);
+      // res.send(result)
+      return res.status(200).json({message:"Successfully added O2"})
+    })
+
+    app.get('/o2/:username', async(req,res)=>{
+      console.log("first")
+      const username = req.params.username;
+      const userO2Data = await userO2Collection.find({username}).toArray();
+      return res.status(200).json(userO2Data);
+    })
 
 
     // Send a ping to confirm a successful connection
