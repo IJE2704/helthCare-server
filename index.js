@@ -26,6 +26,7 @@ async function run() {
 
     const userCollection = client.db("helthCare").collection("user");
     const userO2Collection = client.db("helthCare").collection("O2");
+    const userGlucoseCollection = client.db("helthCare").collection("Glucose");
     
 
     app.get('/users', async(req,res)=>{
@@ -83,6 +84,21 @@ async function run() {
       const username = req.params.username;
       const userO2Data = await userO2Collection.find({username}).toArray();
       return res.status(200).json(userO2Data);
+    })
+
+
+    app.post('/addglucose', async(req,res)=>{
+      const glucose = req.body;
+      const result = await userGlucoseCollection.insertOne(glucose);
+      // res.send(result)
+      return res.status(200).json({message:"Successfully added glucose"})
+    })
+
+    app.get('/glucose/:username', async(req,res)=>{
+      console.log("first")
+      const username = req.params.username;
+      const userGlucoseData = await userGlucoseCollection.find({username}).toArray();
+      return res.status(200).json(userGlucoseData);
     })
 
 
