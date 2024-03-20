@@ -27,6 +27,7 @@ async function run() {
     const userCollection = client.db("helthCare").collection("user");
     const userO2Collection = client.db("helthCare").collection("O2");
     const userGlucoseCollection = client.db("helthCare").collection("Glucose");
+    const userPressureCollection = client.db("helthCare").collection("Pressure");
     
 
     app.get('/users', async(req,res)=>{
@@ -99,6 +100,20 @@ async function run() {
       const username = req.params.username;
       const userGlucoseData = await userGlucoseCollection.find({username}).toArray();
       return res.status(200).json(userGlucoseData);
+    })
+
+    app.post('/addpressure', async(req,res)=>{
+      const pressure = req.body;
+      const result = await userPressureCollection.insertOne(pressure);
+      // res.send(result)
+      return res.status(200).json({message:"Successfully added Pressure"})
+    })
+
+    app.get('/pressure/:username', async(req,res)=>{
+      console.log("first")
+      const username = req.params.username;
+      const userPressureData = await userPressureCollection.find({username}).toArray();
+      return res.status(200).json(userPressureData);
     })
 
 
