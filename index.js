@@ -50,6 +50,26 @@ async function run() {
     });
 
 
+    app.post('/login', async(req,res)=>{
+      const data = req.body;
+      const user = await userCollection.findOne({username:data.username});
+      if(!user){
+        console.log('user not found')
+        return res.status(404).send("User not found");
+      }
+
+    
+        if(user.password === data.password){
+          // res.json(user);
+          console.log("Successfully login")
+          return res.status(200).json(user).send("Successfully logged it")
+        }
+        else{
+          return res.status(401).send("Password does not match")
+        }
+     
+    })
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
