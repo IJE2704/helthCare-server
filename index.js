@@ -3,7 +3,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 require("dotenv").config();
-const port = process.env.PORT || 5004;
+const port = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
@@ -28,6 +28,7 @@ async function run() {
     const userO2Collection = client.db("helthCare").collection("O2");
     const userGlucoseCollection = client.db("helthCare").collection("Glucose");
     const userPressureCollection = client.db("helthCare").collection("Pressure");
+    const userReportsCollection = client.db("helthCare").collection("Reports");
     
 
     app.get('/users', async(req,res)=>{
@@ -114,6 +115,21 @@ async function run() {
       const username = req.params.username;
       const userPressureData = await userPressureCollection.find({username}).toArray();
       return res.status(200).json(userPressureData);
+    })
+
+
+    app.post('/addreport', async(req,res)=>{
+      const report = req.body;
+      const result = await userReportsCollection.insertOne(report);
+      // res.send(result)
+      return res.status(200).json({message:"Successfully added Report"})
+    })
+
+    app.get('/report/:username', async(req,res)=>{
+      console.log("first")
+      const username = req.params.username;
+      const userReportsData = await userReportsCollection.find({username}).toArray();
+      return res.status(200).json(userReportsData);
     })
 
 
