@@ -29,6 +29,7 @@ async function run() {
     const userGlucoseCollection = client.db("helthCare").collection("Glucose");
     const userPressureCollection = client.db("helthCare").collection("Pressure");
     const userReportsCollection = client.db("helthCare").collection("Reports");
+    const userMedicineCollection = client.db("helthCare").collection("Medicine");
     
 
     app.get('/users', async(req,res)=>{
@@ -47,7 +48,7 @@ async function run() {
 
       if (existuser) {
         console.log("username already exist");
-        return res.send("Username already exist");
+        return res.send("User already exist");
       }
       const result = await userCollection.insertOne(data);
       console.log("user registerd successfully");
@@ -78,7 +79,7 @@ async function run() {
       const o2 = req.body;
       const result = await userO2Collection.insertOne(o2);
       // res.send(result)
-      return res.status(200).json({message:"Successfully added O2"})
+      return res.status(200).send(result);
     })
 
     app.get('/o2/:username', async(req,res)=>{
@@ -93,7 +94,7 @@ async function run() {
       const glucose = req.body;
       const result = await userGlucoseCollection.insertOne(glucose);
       // res.send(result)
-      return res.status(200).json({message:"Successfully added glucose"})
+      return res.status(200).send(result);
     })
 
     app.get('/glucose/:username', async(req,res)=>{
@@ -107,7 +108,7 @@ async function run() {
       const pressure = req.body;
       const result = await userPressureCollection.insertOne(pressure);
       // res.send(result)
-      return res.status(200).json({message:"Successfully added Pressure"})
+      return res.status(200).send(result)
     })
 
     app.get('/pressure/:username', async(req,res)=>{
@@ -122,7 +123,7 @@ async function run() {
       const report = req.body;
       const result = await userReportsCollection.insertOne(report);
       // res.send(result)
-      return res.status(200).json({message:"Successfully added Report"})
+      return res.status(200).send(result);
     })
 
     app.get('/report/:username', async(req,res)=>{
@@ -130,6 +131,21 @@ async function run() {
       const username = req.params.username;
       const userReportsData = await userReportsCollection.find({username}).toArray();
       return res.status(200).json(userReportsData);
+    })
+
+
+    app.post('/addmedicine', async(req,res)=>{
+      const medicine = req.body;
+      const result = await userMedicineCollection.insertOne(medicine);
+      // res.send(result)
+      return res.status(200).send(result);
+    })
+
+    app.get('/medicine/:username', async(req,res)=>{
+      console.log("first")
+      const username = req.params.username;
+      const userMedicineData = await userMedicineCollection.find({username}).toArray();
+      return res.status(200).json(userMedicineData);
     })
 
 
