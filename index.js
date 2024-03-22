@@ -252,11 +252,11 @@ async function run() {
 
 
 
-    app.get("/report/:username",checkUserExistence, async (req, res) => {
+    app.get("/report/:userId",checkUserExistence, async (req, res) => {
       console.log("first");
-      const username = req.params.username;
+      const userId = req.params.userId;
       const userReportsData = await userReportsCollection
-        .find({ username })
+        .find({ userId })
         .toArray();
       return res.status(200).json(userReportsData);
     });
