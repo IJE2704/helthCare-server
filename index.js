@@ -151,7 +151,24 @@ async function run() {
 
     app.post("/addo2", realuser, async (req, res) => {
       const o2 = req.body;
-      const result = await userO2Collection.insertOne(o2);
+      console.log(o2)
+      const oxygen = parseInt(o2.bloodO2);
+      let condition='';
+      if(oxygen>90 && oxygen<101){
+        condition='Normal'
+      }
+      else if(oxygen>=101){
+      condition="High";
+      }
+      else{
+        condition="Low"
+      }
+      const newO2 = {
+        ...o2,
+        condition:condition
+      }
+  
+      const result = await userO2Collection.insertOne(newO2);
       // res.send(result)
       return res.status(200).send(result);
     });
@@ -165,7 +182,23 @@ async function run() {
 
     app.post("/addglucose", realuser, async (req, res) => {
       const glucose = req.body;
-      const result = await userGlucoseCollection.insertOne(glucose);
+
+      const sugar = parseFloat(glucose.bloodSugar);
+      let condition='';
+      if(sugar>5.5 && sugar<6.9){
+        condition='Normal'
+      }
+      else if(sugar>=6.9){
+      condition="High";
+      }
+      else{
+        condition="Low"
+      }
+      const newGluecose = {
+        ...glucose,
+        condition:condition
+      }
+      const result = await userGlucoseCollection.insertOne(newGluecose);
       // res.send(result)
       return res.status(200).send(result);
     });
@@ -181,7 +214,22 @@ async function run() {
 
     app.post("/addpressure", realuser, async (req, res) => {
       const pressure = req.body;
-      const result = await userPressureCollection.insertOne(pressure);
+      const highPressure= parseInt(pressure.bloodHighPressure);
+      const lowPressure= parseInt(pressure.bloodLowPressure);
+      if(highPressure<90 && lowPressure<60){
+        condition='Low'
+      }
+      else if(highPressure>140 && lowPressure>90){
+      condition="High";
+      }
+      else{
+        condition="Normal"
+      }
+      const newPressure = {
+        ...pressure,
+        condition:condition
+      }
+      const result = await userPressureCollection.insertOne(newPressure);
       // res.send(result)
       return res.status(200).send(result);
     });
@@ -245,7 +293,25 @@ async function run() {
 
     app.post("/addmeasurements", realuser, async (req, res) => {
       const measurements = req.body;
-      const result = await userMeasurementCollection.insertOne(measurements);
+      console.log(measurements);
+      let condition = '';
+      const height = parseFloat(measurements.height) * 0.3048;
+      console.log(height)
+      console.log(measurements.weight)
+      const bmi = (parseInt(measurements.weight)/(height * height)).toFixed(2);
+      if(bmi>18.40 && bmi <30.00){
+        condition="Healthy"
+      }
+      else{
+        condition="Unhealthy"
+      }
+      const newMeasurements = {
+        ...measurements,
+        condition:condition,
+        bmi:bmi
+      }
+      console.log(newMeasurements)
+      const result = await userMeasurementCollection.insertOne(newMeasurements);
       // res.send(result)
       return res.status(200).send(result);
     });
