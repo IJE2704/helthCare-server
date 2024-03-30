@@ -24,8 +24,6 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-
-
     const userCollection = client.db("helthCare").collection("user");
     const userO2Collection = client.db("helthCare").collection("O2");
     const userGlucoseCollection = client.db("helthCare").collection("Glucose");
@@ -39,20 +37,19 @@ async function run() {
     const userAppointmentCollection = client
       .db("helthCare")
       .collection("Appointment");
-
-
-
-
+    const userMeasurementCollection = client
+      .db("helthCare")
+      .collection("Measurement");
 
     const existuser = async (req, res, next) => {
       try {
         const data = req.body;
         // console.log(data);
         const existuser = await userCollection.findOne({
-          username: data.username
+          username: data.username,
         });
 
-        if(!existuser){
+        if (!existuser) {
           console.log("user not found");
           return res.status(404).send("user not found");
         }
@@ -60,42 +57,41 @@ async function run() {
         req.existuser = existuser;
         next();
       } catch (error) {
-        console.error('Error checking user existence:', error);
-        return res.status(500).send('Internal Server Error');
+        console.error("Error checking user existence:", error);
+        return res.status(500).send("Internal Server Error");
       }
     };
 
     const checkUserExistence = async (req, res, next) => {
       try {
         const userId = req.params.userId;
-        console.log(userId)
+        console.log(userId);
         const user = await userCollection.findOne({ userId });
-    
+
         if (!user) {
           console.log("User not found");
           return res.status(404).send("User not found");
         }
-    
+
         // Attach the found user to the request for later use
         req.user = user;
         next();
       } catch (error) {
-        console.error('Error checking user existence:', error);
-        return res.status(500).send('Internal Server Error');
+        console.error("Error checking user existence:", error);
+        return res.status(500).send("Internal Server Error");
       }
     };
-
 
     const realuser = async (req, res, next) => {
       try {
         const data = req.body;
         // console.log(userId);
-        console.log(data)
+        console.log(data);
         const existuser = await userCollection.findOne({
-          userId: data.userId
+          userId: data.userId,
         });
         console.log(existuser);
-        if(!existuser){
+        if (!existuser) {
           console.log("user not found");
           return res.status(404).send("user not found");
         }
@@ -103,14 +99,10 @@ async function run() {
         req.existuser = existuser;
         next();
       } catch (error) {
-        console.error('Error checking user existence:', error);
-        return res.status(500).send('Internal Server Error');
+        console.error("Error checking user existence:", error);
+        return res.status(500).send("Internal Server Error");
       }
     };
-
-
-
-
 
     app.get("/users", async (req, res) => {
       console.log("get user");
@@ -119,14 +111,12 @@ async function run() {
       res.send(result);
     });
 
-
-
-
     app.post("/registration", async (req, res) => {
+      console.log(req.body);
       const data = req.body;
       const existuser = await userCollection.findOne({
-        username : data.username
-      })
+        username: data.username,
+      });
       if (existuser) {
         console.log("username already exist");
         return res.send("User already exist");
@@ -134,7 +124,7 @@ async function run() {
       const users = userCollection.find();
       const totalUserLength = (await users.toArray()).length;
       // console.log(totalUserLength);
-      const userId = (totalUserLength+1).toString();
+      const userId = (totalUserLength + 1).toString();
       const user = {
         userId: userId,
         ...data,
@@ -146,11 +136,6 @@ async function run() {
         user,
       });
     });
-
-
-
-
-
 
     app.post("/login", existuser, async (req, res) => {
       const data = req.body;
@@ -164,45 +149,28 @@ async function run() {
       }
     });
 
-
-
-
-    
-    app.post("/addo2",realuser, async (req, res) => {
+    app.post("/addo2", realuser, async (req, res) => {
       const o2 = req.body;
       const result = await userO2Collection.insertOne(o2);
       // res.send(result)
       return res.status(200).send(result);
     });
 
-
-
-
-
-
-    app.get("/o2/:userId",checkUserExistence, async (req, res) => {
+    app.get("/o2/:userId", checkUserExistence, async (req, res) => {
       console.log("first");
       const userId = req.params.userId;
       const userO2Data = await userO2Collection.find({ userId }).toArray();
       return res.status(200).json(userO2Data);
     });
 
-
-
-
-
-    app.post("/addglucose",realuser, async (req, res) => {
+    app.post("/addglucose", realuser, async (req, res) => {
       const glucose = req.body;
       const result = await userGlucoseCollection.insertOne(glucose);
       // res.send(result)
       return res.status(200).send(result);
     });
 
-
-
-
-
-    app.get("/glucose/:userId",checkUserExistence, async (req, res) => {
+    app.get("/glucose/:userId", checkUserExistence, async (req, res) => {
       console.log("first");
       const userId = req.params.userId;
       const userGlucoseData = await userGlucoseCollection
@@ -211,23 +179,14 @@ async function run() {
       return res.status(200).json(userGlucoseData);
     });
 
-
-
-
-
-    app.post("/addpressure",realuser, async (req, res) => {
+    app.post("/addpressure", realuser, async (req, res) => {
       const pressure = req.body;
       const result = await userPressureCollection.insertOne(pressure);
       // res.send(result)
       return res.status(200).send(result);
     });
 
-
-
-
-
-
-    app.get("/pressure/:userId",checkUserExistence, async (req, res) => {
+    app.get("/pressure/:userId", checkUserExistence, async (req, res) => {
       console.log("first");
       const userId = req.params.userId;
       const userPressureData = await userPressureCollection
@@ -236,23 +195,14 @@ async function run() {
       return res.status(200).json(userPressureData);
     });
 
-
-
-
-
-
-    app.post("/addreport",realuser, async (req, res) => {
+    app.post("/addreport", realuser, async (req, res) => {
       const report = req.body;
       const result = await userReportsCollection.insertOne(report);
       // res.send(result)
       return res.status(200).send(result);
     });
 
-
-
-
-
-    app.get("/report/:userId",checkUserExistence, async (req, res) => {
+    app.get("/report/:userId", checkUserExistence, async (req, res) => {
       console.log("first");
       const userId = req.params.userId;
       const userReportsData = await userReportsCollection
@@ -261,22 +211,14 @@ async function run() {
       return res.status(200).json(userReportsData);
     });
 
-
-
-
-
-    app.post("/addmedicine",realuser, async (req, res) => {
+    app.post("/addmedicine", realuser, async (req, res) => {
       const medicine = req.body;
       const result = await userMedicineCollection.insertOne(medicine);
       // res.send(result)
       return res.status(200).send(result);
     });
 
-
-
-
-
-    app.get("/medicine/:userId",checkUserExistence, async (req, res) => {
+    app.get("/medicine/:userId", checkUserExistence, async (req, res) => {
       console.log("first");
       const userId = req.params.userId;
       const userMedicineData = await userMedicineCollection
@@ -285,28 +227,36 @@ async function run() {
       return res.status(200).json(userMedicineData);
     });
 
-
-
-
-    app.post("/addappointment",realuser, async (req, res) => {
+    app.post("/addappointment", realuser, async (req, res) => {
       const appointment = req.body;
       const result = await userAppointmentCollection.insertOne(appointment);
       // res.send(result)
       return res.status(200).send(result);
     });
 
-    
-
-
-
-
-    app.get("/appointment/:userId",checkUserExistence, async (req, res) => {
+    app.get("/appointment/:userId", checkUserExistence, async (req, res) => {
       console.log("first");
       const userId = req.params.userId;
       const appointmentData = await userAppointmentCollection
         .find({ userId })
         .toArray();
       return res.status(200).json(appointmentData);
+    });
+
+    app.post("/addmeasurements", realuser, async (req, res) => {
+      const measurements = req.body;
+      const result = await userMeasurementCollection.insertOne(measurements);
+      // res.send(result)
+      return res.status(200).send(result);
+    });
+
+    app.get("/measurements/:userId", checkUserExistence, async (req, res) => {
+      console.log("first");
+      const userId = req.params.userId;
+      const measurementsData = await userMeasurementCollection
+        .find({ userId })
+        .toArray();
+      return res.status(200).json(measurementsData);
     });
 
     // Send a ping to confirm a successful connection
