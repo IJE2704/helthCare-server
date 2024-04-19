@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const app = express();
 const cors = require("cors");
@@ -41,6 +41,9 @@ async function run() {
       .db("helthCare")
       .collection("Measurement");
 
+    // =========================================
+    // ********** Midlware to check user *******
+    // =========================================
     const existuser = async (req, res, next) => {
       try {
         const data = req.body;
@@ -61,7 +64,9 @@ async function run() {
         return res.status(500).send("Internal Server Error");
       }
     };
-
+    // =========================================
+    // ********** Midlware to check user *******
+    // =========================================
     const checkUserExistence = async (req, res, next) => {
       try {
         const userId = req.params.userId;
@@ -81,7 +86,9 @@ async function run() {
         return res.status(500).send("Internal Server Error");
       }
     };
-
+    // =========================================
+    // ********** Midlware to check user *******
+    // =========================================
     const realuser = async (req, res, next) => {
       try {
         const data = req.body;
@@ -104,12 +111,19 @@ async function run() {
       }
     };
 
+    // =========================================
+    // **********    User route         *******
+    // =========================================
     app.get("/users", async (req, res) => {
       console.log("get user");
       const users = userCollection.find();
       const result = await users.toArray();
       res.send(result);
     });
+
+    // =========================================
+    // **********    sign up route         *******
+    // =========================================
 
     app.post("/registration", async (req, res) => {
       console.log(req.body);
@@ -137,6 +151,10 @@ async function run() {
       });
     });
 
+    // =========================================
+    // **********    Login route         *******
+    // =========================================
+
     app.post("/login", existuser, async (req, res) => {
       const data = req.body;
       const user = req.existuser;
@@ -149,29 +167,35 @@ async function run() {
       }
     });
 
+    // =========================================
+    // **********    add o2 route         *******
+    // =========================================
+
     app.post("/addo2", realuser, async (req, res) => {
       const o2 = req.body;
-      console.log(o2)
+      console.log(o2);
       const oxygen = parseInt(o2.bloodO2);
-      let condition='';
-      if(oxygen>90 && oxygen<101){
-        condition='Normal'
-      }
-      else if(oxygen>=101){
-      condition="High";
-      }
-      else{
-        condition="Low"
+      let condition = "";
+      if (oxygen > 90 && oxygen < 101) {
+        condition = "Normal";
+      } else if (oxygen >= 101) {
+        condition = "High";
+      } else {
+        condition = "Low";
       }
       const newO2 = {
         ...o2,
-        condition:condition
-      }
-  
+        condition: condition,
+      };
+
       const result = await userO2Collection.insertOne(newO2);
       // res.send(result)
       return res.status(200).send(result);
     });
+
+    // =========================================
+    // **********    Get o2 route         *******
+    // =========================================
 
     app.get("/o2/:userId", checkUserExistence, async (req, res) => {
       console.log("first");
@@ -179,29 +203,33 @@ async function run() {
       const userO2Data = await userO2Collection.find({ userId }).toArray();
       return res.status(200).json(userO2Data);
     });
-
+    // =========================================
+    // **********    ADD Gluecose route         *******
+    // =========================================
     app.post("/addglucose", realuser, async (req, res) => {
       const glucose = req.body;
 
       const sugar = parseFloat(glucose.bloodSugar);
-      let condition='';
-      if(sugar>5.5 && sugar<6.9){
-        condition='Normal'
-      }
-      else if(sugar>=6.9){
-      condition="High";
-      }
-      else{
-        condition="Low"
+      let condition = "";
+      if (sugar > 5.5 && sugar < 6.9) {
+        condition = "Normal";
+      } else if (sugar >= 6.9) {
+        condition = "High";
+      } else {
+        condition = "Low";
       }
       const newGluecose = {
         ...glucose,
-        condition:condition
-      }
+        condition: condition,
+      };
       const result = await userGlucoseCollection.insertOne(newGluecose);
       // res.send(result)
       return res.status(200).send(result);
     });
+
+    // =========================================
+    // **********    get route         *******
+    // =========================================
 
     app.get("/glucose/:userId", checkUserExistence, async (req, res) => {
       console.log("first");
@@ -211,28 +239,32 @@ async function run() {
         .toArray();
       return res.status(200).json(userGlucoseData);
     });
-
+    // =========================================
+    // **********    add pressure route         *******
+    // =========================================
     app.post("/addpressure", realuser, async (req, res) => {
       const pressure = req.body;
-      const highPressure= parseInt(pressure.bloodHighPressure);
-      const lowPressure= parseInt(pressure.bloodLowPressure);
-      if(highPressure<90 && lowPressure<60){
-        condition='Low'
-      }
-      else if(highPressure>140 && lowPressure>90){
-      condition="High";
-      }
-      else{
-        condition="Normal"
+      const highPressure = parseInt(pressure.bloodHighPressure);
+      const lowPressure = parseInt(pressure.bloodLowPressure);
+      if (highPressure < 90 && lowPressure < 60) {
+        condition = "Low";
+      } else if (highPressure > 140 && lowPressure > 90) {
+        condition = "High";
+      } else {
+        condition = "Normal";
       }
       const newPressure = {
         ...pressure,
-        condition:condition
-      }
+        condition: condition,
+      };
       const result = await userPressureCollection.insertOne(newPressure);
       // res.send(result)
       return res.status(200).send(result);
     });
+
+    // =========================================
+    // **********    Get pressure route         *******
+    // =========================================
 
     app.get("/pressure/:userId", checkUserExistence, async (req, res) => {
       console.log("first");
@@ -243,12 +275,20 @@ async function run() {
       return res.status(200).json(userPressureData);
     });
 
+    // =========================================
+    // **********    add report route         *******
+    // =========================================
+
     app.post("/addreport", realuser, async (req, res) => {
       const report = req.body;
       const result = await userReportsCollection.insertOne(report);
       // res.send(result)
       return res.status(200).send(result);
     });
+
+    // =========================================
+    // **********    get report route         *******
+    // =========================================
 
     app.get("/report/:userId", checkUserExistence, async (req, res) => {
       console.log("first");
@@ -259,12 +299,40 @@ async function run() {
       return res.status(200).json(userReportsData);
     });
 
+    // =========================================
+    // **********    delete report route         *******
+    // =========================================
+
+    app.delete("/report/delete/:id", async (req, res) => {
+      const id = req.params.id;
+      // console.log(id)
+      try {
+        const query = { _id: new ObjectId(id) };
+        const result = await userReportsCollection.deleteOne(query);
+        console.log(result);
+        return res.send(result);
+      } catch (error) {
+        console.error(error);
+        return res.status(500).send("Internal server error");
+      }
+    });
+
+    // =========================================
+    // **********    add medicines route         *******
+    // =========================================
+
     app.post("/addmedicine", realuser, async (req, res) => {
       const medicine = req.body;
       const result = await userMedicineCollection.insertOne(medicine);
       // res.send(result)
       return res.status(200).send(result);
     });
+
+
+
+    // =========================================
+    // **********    Get medicines route         *******
+    // =========================================
 
     app.get("/medicine/:userId", checkUserExistence, async (req, res) => {
       console.log("first");
@@ -275,12 +343,38 @@ async function run() {
       return res.status(200).json(userMedicineData);
     });
 
+        // =========================================
+    // **********    remove medicines route         *******
+    // =========================================
+
+    app.delete("/medicine/delete/:id", async (req, res) => {
+      const id = req.params.id;
+      // console.log(id)
+      try {
+        const query = { _id: new ObjectId(id) };
+        const result = await userMedicineCollection.deleteOne(query);
+        console.log(result);
+        return res.send(result);
+      } catch (error) {
+        console.error(error);
+        return res.status(500).send("Internal server error");
+      }
+    });
+
+    // =========================================
+    // **********    add appointments route         *******
+    // =========================================
+
     app.post("/addappointment", realuser, async (req, res) => {
       const appointment = req.body;
       const result = await userAppointmentCollection.insertOne(appointment);
       // res.send(result)
       return res.status(200).send(result);
     });
+
+    // =========================================
+    // **********    get appointments route         *******
+    // =========================================
 
     app.get("/appointment/:userId", checkUserExistence, async (req, res) => {
       console.log("first");
@@ -291,30 +385,57 @@ async function run() {
       return res.status(200).json(appointmentData);
     });
 
+        // =========================================
+    // **********    remove appointments route         *******
+    // =========================================
+
+    app.delete("/appointment/delete/:id", async (req, res) => {
+      const id = req.params.id;
+      // console.log(id)
+      try {
+        const query = { _id: new ObjectId(id) };
+        const result = await userAppointmentCollection.deleteOne(query);
+        console.log(result);
+        return res.send(result);
+      } catch (error) {
+        console.error(error);
+        return res.status(500).send("Internal server error");
+      }
+    });
+
+    // =========================================
+    // **********    add mesurements route         *******
+    // =========================================
+
     app.post("/addmeasurements", realuser, async (req, res) => {
       const measurements = req.body;
       console.log(measurements);
-      let condition = '';
+      let condition = "";
       const height = parseFloat(measurements.height) * 0.3048;
-      console.log(height)
-      console.log(measurements.weight)
-      const bmi = (parseInt(measurements.weight)/(height * height)).toFixed(2);
-      if(bmi>18.40 && bmi <30.00){
-        condition="Healthy"
-      }
-      else{
-        condition="Unhealthy"
+      console.log(height);
+      console.log(measurements.weight);
+      const bmi = (parseInt(measurements.weight) / (height * height)).toFixed(
+        2
+      );
+      if (bmi > 18.4 && bmi < 30.0) {
+        condition = "Healthy";
+      } else {
+        condition = "Unhealthy";
       }
       const newMeasurements = {
         ...measurements,
-        condition:condition,
-        bmi:bmi
-      }
-      console.log(newMeasurements)
+        condition: condition,
+        bmi: bmi,
+      };
+      console.log(newMeasurements);
       const result = await userMeasurementCollection.insertOne(newMeasurements);
       // res.send(result)
       return res.status(200).send(result);
     });
+
+    // =========================================
+    // **********    get measurements route         *******
+    // =========================================
 
     app.get("/measurements/:userId", checkUserExistence, async (req, res) => {
       console.log("first");
