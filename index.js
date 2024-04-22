@@ -487,6 +487,24 @@ async function run() {
       return res.status(200).json(notificationData);
     });
 
+     // =========================================
+    // **********    remove notifications route         *******
+    // =========================================
+
+    app.delete("/notifications/delete/:id", async (req, res) => {
+      const id = req.params.id;
+      // console.log(id)
+      try {
+        const query = { _id: new ObjectId(id) };
+        const result = await userNotificationCollection.deleteOne(query);
+        console.log(result);
+        return res.send(result);
+      } catch (error) {
+        console.error(error);
+        return res.status(500).send("Internal server error");
+      }
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
