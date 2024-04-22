@@ -503,6 +503,7 @@ async function run() {
     app.post("/addmedicine", realuser, async (req, res) => {
       const medicine = req.body;
       const result = await userMedicineCollection.insertOne(medicine);
+      checkDate();
       // res.send(result)
       return res.status(200).send(result);
     });
@@ -545,6 +546,7 @@ async function run() {
     app.post("/addappointment", realuser, async (req, res) => {
       const appointment = req.body;
       const result = await userAppointmentCollection.insertOne(appointment);
+      checkDate();
       // res.send(result)
       return res.status(200).send(result);
     });
