@@ -230,12 +230,16 @@ async function run() {
         condition = "Normal";
       } else if (sugar >= 6.9) {
         condition = "High";
-        const userId = glucose.userId;
-        console.log(userId);
-        sendNotification("High Sugar level detected");
+        sendNotification({
+          userId : glucose.userId,
+          message:"High sugar level detected"
+        })
       } else {
         condition = "Low";
-        sendNotification("Low Sugar level detected");
+        sendNotification({
+          userId : glucose.userId,
+          message:"Low sugar level detected"
+        })
       }
       const newGluecose = {
         ...glucose,
@@ -267,10 +271,16 @@ async function run() {
       const lowPressure = parseInt(pressure.bloodLowPressure);
       if (highPressure < 90 && lowPressure < 60) {
         condition = "Low";
-        sendNotification("Low pressure level detected");
+        sendNotification({
+          userId : pressure.userId,
+          message:"Low pressure level detected"
+        });
       } else if (highPressure > 140 && lowPressure > 90) {
         condition = "High";
-        sendNotification("High pressure level detected");
+        sendNotification({
+          userId : pressure.userId,
+          message:"High pressure level detected"
+        });
       } else {
         condition = "Normal";
       }
