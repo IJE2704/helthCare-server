@@ -2,6 +2,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const moment = require("moment");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
@@ -46,6 +47,49 @@ async function run() {
     const userBloodInformationCollection = client
       .db("helthCare")
       .collection("BloodInformation");
+
+    // =========================================
+    // ********** function for send notificatin *******
+    // =========================================
+
+    const checkDate = async () => {
+      try {
+        const today = moment().format("YYYY-MM-DD");
+
+        const medicineEndingToday = await userMedicineCollection
+          .find({ endingDate: today })
+          .toArray();
+
+        const todayAppointMent = await userAppointmentCollection
+          .find({ date: today })
+          .toArray();
+
+        if (medicineEndingToday.length > 0) {
+          medicineEndingToday.map((medi) => {
+            const notification = {
+              userId: medi.userId,
+              name: "Alert",
+              message: `Medicine ${medi.name} is ending today.`,
+            };
+            console.log(notification)
+            sendNotification(notification);
+          });
+        }
+        if (todayAppointMent.length > 0) {
+          todayAppointMent.map((appointment) => {
+            const notification = {
+              userId: appointment.userId,
+              name: "Remainder",
+              message: `Today you have appointment with ${appointment.name} in ${appointment.location} at ${appointment.time}.`,
+            };
+            console.log(notification)
+            sendNotification(notification);
+          });
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
     // =========================================
     // ********** Midlware to check user *******
@@ -187,14 +231,14 @@ async function run() {
         oxygenCondition = "High";
         sendNotification({
           userId: bloodInformation.userId,
-          name:'Emergency',
+          name: "Emergency",
           message: "High oxygen level detected.",
         });
       } else {
         oxygenCondition = "Low";
         sendNotification({
           userId: bloodInformation.userId,
-          name:'Emergency',
+          name: "Emergency",
           message: "Low oxygen level detected.",
         });
       }
@@ -211,17 +255,17 @@ async function run() {
       } else if (sugar >= 6.9) {
         sugarConditon = "High";
         sendNotification({
-          userId : bloodInformation.userId,
-          name:'Emergency',
-          message:"High sugar level detected"
-        })
+          userId: bloodInformation.userId,
+          name: "Emergency",
+          message: "High sugar level detected",
+        });
       } else {
         sugarConditon = "Low";
         sendNotification({
-          userId : bloodInformation.userId,
-          name:'Emergency',
-          message:"Low sugar level detected"
-        })
+          userId: bloodInformation.userId,
+          name: "Emergency",
+          message: "Low sugar level detected",
+        });
       }
       const new2BloodInformation = {
         ...newBloodInformation,
@@ -229,24 +273,22 @@ async function run() {
       };
       // const resultSugar = await userGlucoseCollection.insertOne(newGluecose);
 
-
-
       const highPressure = parseInt(bloodInformation.bloodHighPressure);
       const lowPressure = parseInt(bloodInformation.bloodLowPressure);
-      let bloodPressureCondition = ''
+      let bloodPressureCondition = "";
       if (highPressure < 90 && lowPressure < 60) {
         bloodPressureCondition = "Low";
         sendNotification({
-          userId : bloodInformation.userId,
-          name:'Emergency',
-          message:"Low pressure level detected"
+          userId: bloodInformation.userId,
+          name: "Emergency",
+          message: "Low pressure level detected",
         });
       } else if (highPressure > 140 && lowPressure > 90) {
         bloodPressureCondition = "High";
         sendNotification({
-          userId : bloodInformation.userId,
-          name:'Emergency',
-          message:"High pressure level detected"
+          userId: bloodInformation.userId,
+          name: "Emergency",
+          message: "High pressure level detected",
         });
       } else {
         bloodPressureCondition = "Normal";
@@ -255,24 +297,30 @@ async function run() {
         ...new2BloodInformation,
         bloodPressureCondition: bloodPressureCondition,
       };
-      const result = await userBloodInformationCollection.insertOne(new3BloodInformation);
+      const result = await userBloodInformationCollection.insertOne(
+        new3BloodInformation
+      );
       // res.send(result)
-      console.log(new3BloodInformation)
+      console.log(new3BloodInformation);
       return res.status(200).send(result);
     });
-
 
     // =========================================
     // **********    Get bloodinformation route         *******
     // =========================================
 
-    app.get("/blood/information/:userId", checkUserExistence, async (req, res) => {
-      console.log("first");
-      const userId = req.params.userId;
-      const bloodInformationData = await userBloodInformationCollection.find({ userId }).toArray();
-      return res.status(200).json(bloodInformationData);
-    });
-
+    app.get(
+      "/blood/information/:userId",
+      checkUserExistence,
+      async (req, res) => {
+        console.log("first");
+        const userId = req.params.userId;
+        const bloodInformationData = await userBloodInformationCollection
+          .find({ userId })
+          .toArray();
+        return res.status(200).json(bloodInformationData);
+      }
+    );
 
     // =========================================
     // **********    add o2 route         *******
@@ -331,15 +379,15 @@ async function run() {
       } else if (sugar >= 6.9) {
         condition = "High";
         sendNotification({
-          userId : glucose.userId,
-          message:"High sugar level detected"
-        })
+          userId: glucose.userId,
+          message: "High sugar level detected",
+        });
       } else {
         condition = "Low";
         sendNotification({
-          userId : glucose.userId,
-          message:"Low sugar level detected"
-        })
+          userId: glucose.userId,
+          message: "Low sugar level detected",
+        });
       }
       const newGluecose = {
         ...glucose,
@@ -372,14 +420,14 @@ async function run() {
       if (highPressure < 90 && lowPressure < 60) {
         condition = "Low";
         sendNotification({
-          userId : pressure.userId,
-          message:"Low pressure level detected"
+          userId: pressure.userId,
+          message: "Low pressure level detected",
         });
       } else if (highPressure > 140 && lowPressure > 90) {
         condition = "High";
         sendNotification({
-          userId : pressure.userId,
-          message:"High pressure level detected"
+          userId: pressure.userId,
+          message: "High pressure level detected",
         });
       } else {
         condition = "Normal";
@@ -587,7 +635,7 @@ async function run() {
       return res.status(200).json(notificationData);
     });
 
-     // =========================================
+    // =========================================
     // **********    remove notifications route         *******
     // =========================================
 
@@ -604,6 +652,9 @@ async function run() {
         return res.status(500).send("Internal server error");
       }
     });
+
+    // function call for send notification
+    checkDate();
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
