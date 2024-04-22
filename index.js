@@ -43,6 +43,9 @@ async function run() {
     const userNotificationCollection = client
       .db("helthCare")
       .collection("Notification");
+    const userBloodInformationCollection = client
+      .db("helthCare")
+      .collection("BloodInformation");
 
     // =========================================
     // ********** Midlware to check user *******
@@ -173,6 +176,91 @@ async function run() {
         return res.status(401).send("Password does not match");
       }
     });
+
+    app.post("/add/blood/information", realuser, async (req, res) => {
+      const bloodInformation = req.body;
+      const oxygen = parseInt(bloodInformation.bloodO2);
+      let oxygenCondition = "";
+      if (oxygen > 90 && oxygen < 101) {
+        oxygenCondition = "Normal";
+      } else if (oxygen >= 101) {
+        oxygenCondition = "High";
+        sendNotification({
+          userId: bloodInformation.userId,
+          name:'Emergency',
+          message: "High oxygen level detected.",
+        });
+      } else {
+        oxygenCondition = "Low";
+        sendNotification({
+          userId: bloodInformation.userId,
+          name:'Emergency',
+          message: "Low oxygen level detected.",
+        });
+      }
+      const newBloodInformation = {
+        ...bloodInformation,
+        oxygenCondition: oxygenCondition,
+      };
+      // const resultOxygen = await userO2Collection.insertOne(newBloodInformation);
+
+      const sugar = parseFloat(bloodInformation.bloodSugar);
+      let sugarConditon = "";
+      if (sugar > 5.5 && sugar < 6.9) {
+        sugarConditon = "Normal";
+      } else if (sugar >= 6.9) {
+        sugarConditon = "High";
+        sendNotification({
+          userId : bloodInformation.userId,
+          name:'Emergency',
+          message:"High sugar level detected"
+        })
+      } else {
+        sugarConditon = "Low";
+        sendNotification({
+          userId : bloodInformation.userId,
+          name:'Emergency',
+          message:"Low sugar level detected"
+        })
+      }
+      const new2BloodInformation = {
+        ...newBloodInformation,
+        sugarConditon: sugarConditon,
+      };
+      // const resultSugar = await userGlucoseCollection.insertOne(newGluecose);
+
+
+
+      const highPressure = parseInt(bloodInformation.bloodHighPressure);
+      const lowPressure = parseInt(bloodInformation.bloodLowPressure);
+      let bloodPressureCondition = ''
+      if (highPressure < 90 && lowPressure < 60) {
+        bloodPressureCondition = "Low";
+        sendNotification({
+          userId : bloodInformation.userId,
+          name:'Emergency',
+          message:"Low pressure level detected"
+        });
+      } else if (highPressure > 140 && lowPressure > 90) {
+        bloodPressureCondition = "High";
+        sendNotification({
+          userId : bloodInformation.userId,
+          name:'Emergency',
+          message:"High pressure level detected"
+        });
+      } else {
+        bloodPressureCondition = "Normal";
+      }
+      const new3BloodInformation = {
+        ...new2BloodInformation,
+        bloodPressureCondition: bloodPressureCondition,
+      };
+      const result = await userBloodInformationCollection.insertOne(new3BloodInformation);
+      // res.send(result)
+      console.log(new3BloodInformation)
+      return res.status(200).send(result);
+    });
+
 
     // =========================================
     // **********    add o2 route         *******
