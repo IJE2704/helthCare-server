@@ -53,6 +53,7 @@ async function run() {
     // =========================================
 
     const checkDate = async () => {
+      console.log("call checked function")
       try {
         const today = moment().format("YYYY-MM-DD");
 
