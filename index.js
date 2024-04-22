@@ -263,6 +263,18 @@ async function run() {
 
 
     // =========================================
+    // **********    Get bloodinformation route         *******
+    // =========================================
+
+    app.get("/blood/information/:userId", checkUserExistence, async (req, res) => {
+      console.log("first");
+      const userId = req.params.userId;
+      const bloodInformationData = await userBloodInformationCollection.find({ userId }).toArray();
+      return res.status(200).json(bloodInformationData);
+    });
+
+
+    // =========================================
     // **********    add o2 route         *******
     // =========================================
 
