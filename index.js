@@ -40,6 +40,9 @@ async function run() {
     const userMeasurementCollection = client
       .db("helthCare")
       .collection("Measurement");
+    const userNotificationCollection = client
+      .db("helthCare")
+      .collection("Notification");
 
     // =========================================
     // ********** Midlware to check user *******
@@ -111,6 +114,10 @@ async function run() {
       }
     };
 
+    const sendNotification = async (notification) => {
+      const result = await userNotificationCollection.insertOne(notification);
+    };
+
     // =========================================
     // **********    User route         *******
     // =========================================
@@ -173,15 +180,23 @@ async function run() {
 
     app.post("/addo2", realuser, async (req, res) => {
       const o2 = req.body;
-      console.log(o2);
+      console.log(o2.userId);
       const oxygen = parseInt(o2.bloodO2);
       let condition = "";
       if (oxygen > 90 && oxygen < 101) {
         condition = "Normal";
       } else if (oxygen >= 101) {
         condition = "High";
+        sendNotification({
+          userId: o2.userId,
+          message: "High oxygen level detected.",
+        });
       } else {
         condition = "Low";
+        sendNotification({
+          userId: o2.userId,
+          message: "Low oxygen level detected.",
+        });
       }
       const newO2 = {
         ...o2,
@@ -208,15 +223,19 @@ async function run() {
     // =========================================
     app.post("/addglucose", realuser, async (req, res) => {
       const glucose = req.body;
-
+      console.log("hello");
       const sugar = parseFloat(glucose.bloodSugar);
       let condition = "";
       if (sugar > 5.5 && sugar < 6.9) {
         condition = "Normal";
       } else if (sugar >= 6.9) {
         condition = "High";
+        const userId = glucose.userId;
+        console.log(userId);
+        sendNotification("High Sugar level detected");
       } else {
         condition = "Low";
+        sendNotification("Low Sugar level detected");
       }
       const newGluecose = {
         ...glucose,
@@ -248,8 +267,10 @@ async function run() {
       const lowPressure = parseInt(pressure.bloodLowPressure);
       if (highPressure < 90 && lowPressure < 60) {
         condition = "Low";
+        sendNotification("Low pressure level detected");
       } else if (highPressure > 140 && lowPressure > 90) {
         condition = "High";
+        sendNotification("High pressure level detected");
       } else {
         condition = "Normal";
       }
@@ -328,8 +349,6 @@ async function run() {
       return res.status(200).send(result);
     });
 
-
-
     // =========================================
     // **********    Get medicines route         *******
     // =========================================
@@ -343,7 +362,7 @@ async function run() {
       return res.status(200).json(userMedicineData);
     });
 
-        // =========================================
+    // =========================================
     // **********    remove medicines route         *******
     // =========================================
 
@@ -385,7 +404,7 @@ async function run() {
       return res.status(200).json(appointmentData);
     });
 
-        // =========================================
+    // =========================================
     // **********    remove appointments route         *******
     // =========================================
 
@@ -444,6 +463,18 @@ async function run() {
         .find({ userId })
         .toArray();
       return res.status(200).json(measurementsData);
+    });
+
+    // =========================================
+    // **********    get notifications route         *******
+    // =========================================
+
+    app.get("/notification/:userId", checkUserExistence, async (req, res) => {
+      const userId = req.params.userId;
+      const notificationData = await userNotificationCollection
+        .find({ userId })
+        .toArray();
+      return res.status(200).json(notificationData);
     });
 
     // Send a ping to confirm a successful connection
